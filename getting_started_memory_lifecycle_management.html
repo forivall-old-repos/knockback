@@ -106,31 +106,29 @@ kb.applyBindings(view_model, el);
 // OR: Manually
 kb.releaseOnNodeRemove(view_model, el);</pre><p>This means you can use a Backbone.Router as follows and not need to explicitly call kb.release() because ko.removeNode calls it for you:</p>
 
-          <pre data-for="cs">window.RouterBackboneJS = Backbone.Router.extend({
+          <pre data-for="cs">class window.RouterBackboneJS extends Backbone.Router
   constructor: -&gt;
-    Backbone.Router.prototype.constructor.apply(@, arguments)
+    super
     
-    loadPage = function(el) {
+    loadPage = (el) =>
       ko.removeNode(@active_el) if @active_el
       $('body').append(@active_el = el)
       $(el).addClass('active')
-    }
     
-    @route('', null, -&gt; loadPage(kb.renderTemplate('home', new HomeViewModel())))
-    @route('things', null, -&gt; loadUrl(kb.renderTemplate('things_page', new ThingsPageViewModel())))
-    @route('things/:id', null, (id) -&gt; loadPage(kb.renderTemplate('thing_page', new ThingCellViewModel(things_collection.get(id)))))
-})</pre>
+    @route '', null, -&gt; loadPage(kb.renderTemplate('home', new HomeViewModel()))
+    @route 'things', null, -&gt; loadUrl(kb.renderTemplate('things_page', new ThingsPageViewModel()))
+    @route 'things/:id', null, (id) -&gt; loadPage(kb.renderTemplate('thing_page', new ThingCellViewModel(things_collection.get(id))))
+</pre>
           <pre data-for="js">window.RouterBackboneJS = Backbone.Router.extend({
 
   constructor: function() {
-    var _this = this;
-    Backbone.Router.prototype.constructor.apply(this, arguments);
+    Backbone.Router.apply(this, arguments);
     
-    var loadPage = function(el) {
-      if (_this.active_el) {ko.removeNode(this.active_el); }
-      $('body').append(_this.active_el = el);
+    var loadPage = (function(el) {
+      if (this.active_el) { ko.removeNode(this.active_el); }
+      $('body').append(this.active_el = el);
       $(el).addClass('active');
-    }
+    }).bind(this)
     
     this.route('', null, function() { loadPage(kb.renderTemplate('home', new HomeViewModel())); });
     this.route('things', null, function() { loadPage(kb.renderTemplate('things_page', new ThingsPageViewModel())); });
